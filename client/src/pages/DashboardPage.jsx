@@ -12,7 +12,13 @@ function DashboardPage() {
   const [chatInput, setChatInput] = useState('');
   const [routeStatus, setRouteStatus] = useState('');
   const [utilityStatus, setUtilityStatus] = useState('');
-
+  const [buttonPos, setButtonPos] = useState({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
+  
+  // CTF Challenge: Why won't the modal open?
+  const [decryptState, setDecryptState] = useState({ 
+    isVisible: false, 
+    decipheredText: 'CTF_FLAG{r34ct_mUt4t10n_b4d}' 
+  });
   // Intentionally kept in code, not rendered visibly.
   const hiddenPassageLink = '/feedback-final';
   const outroParagraph = 'The machine does not reward speed, it rewards precision. Read every detail, test every assumption, and treat every failure as signal.';
@@ -73,7 +79,7 @@ function DashboardPage() {
   
   const handleButtonKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      handleContinue();
+      moveButton(e);
     }
   };
   
@@ -81,6 +87,22 @@ function DashboardPage() {
     setRouteStatus('');
     await advanceLevel(3, 'dashboard-feedback-final');
     navigate('/feedback-final');
+  };
+
+  const moveButton = (e) => {
+    e.preventDefault();
+    const newTop = Math.floor(Math.random() * 80) + 10;
+    const newLeft = Math.floor(Math.random() * 80) + 10;
+    setButtonPos({
+      top: `${newTop}%`,
+      left: `${newLeft}%`,
+      transform: 'translate(-50%, -50%)'
+    });
+  };
+
+  const handleDecryptClick = () => {
+    // STUDENT CHALLENGE: This button doesn't seem to open the modal. Why?
+    decryptState.isVisible = true;
   };
   
   return (
@@ -173,7 +195,17 @@ function DashboardPage() {
           >
             Reset Session
           </button>
+          <button className="cyber-btn" onClick={handleDecryptClick}>
+            Decrypt Secret
+          </button>
         </div>
+        
+        {decryptState.isVisible && (
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#220022', border: '1px solid var(--color-pink)' }}>
+            <h4 style={{ color: 'var(--color-pink)', marginBottom: '0.5rem' }}>Decrypted Payload:</h4>
+            <code>{decryptState.decipheredText}</code>
+          </div>
+        )}
         {utilityStatus && (
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.75rem' }}>
             {utilityStatus}
@@ -184,16 +216,22 @@ function DashboardPage() {
       <div style={{ 
         position: 'relative', 
         height: '150px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        width: '100%',
+        overflow: 'hidden',
       }}>
         <button
           ref={continueButtonRef}
           className="cyber-btn"
-          onClick={handleContinue}
+          onClick={moveButton}
           onKeyDown={handleButtonKeyDown}
-          data-hidden-path={hiddenPassageLink}
+          style={{ 
+            position: 'absolute', 
+            top: buttonPos.top, 
+            left: buttonPos.left, 
+            transform: buttonPos.transform,
+            transition: 'top 0.2s ease-out, left 0.2s ease-out',
+            zIndex: 10
+          }}
         >
           Continue to Final Feedback →
         </button>

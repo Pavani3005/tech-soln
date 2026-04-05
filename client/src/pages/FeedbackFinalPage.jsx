@@ -221,9 +221,26 @@ function FeedbackFinalPage() {
 
           {submitStatus && <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>{submitStatus}</p>}
 
-          <button type="submit" className="cyber-btn" style={{ width: '100%' }} disabled={isSubmitting}>
-            {isSubmitting ? 'Submitting...' : 'Submit Final Feedback'}
-          </button>
+          <div style={{ position: 'relative' }}>
+            {/* STUDENT CHALLENGE: Why can't I click the submit button? (Z-Index Trap) */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                zIndex: 9999,
+                cursor: 'not-allowed',
+                opacity: 0 // Invisible trap!
+              }} 
+              title="System Error: Button Blocked"
+              onClick={(e) => {
+                e.preventDefault();
+                setSubmitStatus("ERR_BLOCKED: An invisible force prevents submission.");
+              }}
+            />
+            <button type="submit" className="cyber-btn" style={{ width: '100%', position: 'relative', zIndex: 1 }} disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Final Feedback'}
+            </button>
+          </div>
         </form>
 
         <div style={{

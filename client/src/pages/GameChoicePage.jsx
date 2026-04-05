@@ -31,7 +31,7 @@ function GameChoicePage() {
         <div className="cyber-card" style={{ margin: 0 }}>
           <h3 style={{ color: 'var(--color-delete)', marginBottom: '0.75rem' }}>What To Do Now</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-            1. Open the video guide (shared by instructor).
+            1. Open the <a href="https://drive.google.com/file/d/1usQjNgeYyrcHhCHK4MkhMdsyAKGZAeQL/view?usp=drive_link" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-pink)', textDecoration: 'underline' }}>video guide</a>.
           </p>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
             2. Build the same game while the system is in waiting mode.

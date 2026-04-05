@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import FeedbackFinalPage from './pages/FeedbackFinalPage';
 import CompletionPage from './pages/CompletionPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -15,9 +16,24 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/game-choice" element={<GameChoicePage />} />
-          <Route path="/loading" element={<LoadingPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/feedback-final" element={<FeedbackFinalPage />} />
+          
+          {/* CTF Challenge: Why aren't these routes being protected properly?? */}
+          <Route element={<ProtectedRoute requireLevel={2} />}>
+            <Route path="/loading" element={<LoadingPage />} />
+          </Route>
+          
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/feedback-final" element={
+            <ProtectedRoute requiredLevel="level-4">
+              <FeedbackFinalPage />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/complete" element={<CompletionPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
         </Routes>

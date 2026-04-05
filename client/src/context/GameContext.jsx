@@ -124,6 +124,17 @@ export function GameProvider({ children }) {
     }
   };
   
+  const fetchSecretKey = async () => {
+    // STUDENT CHALLENGE: This function is supposed to return the final secret.
+    // Why is the component rendering "[object Promise]" instead of the actual key?
+    // Find the missing keywords.
+    const response = fetch('/api/secret-key', {
+      method: 'GET',
+    });
+    
+    return response.json();
+  };
+
   const completeGame = async () => {
     const totalTimeMs = Date.now() - startTime;
     
@@ -175,6 +186,7 @@ export function GameProvider({ children }) {
     advanceLevel,
     useHint,
     completeGame,
+    fetchSecretKey,
   };
   
   return (
