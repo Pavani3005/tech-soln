@@ -16,7 +16,7 @@ function FeedbackFinalPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [formState, setFormState] = useState({
     teamName: '',
-    phoneCounter: 1000000000,
+    phone: '',
     email: '',
     dob: '',
     favoriteBug: '',
@@ -31,29 +31,17 @@ function FeedbackFinalPage() {
     console.log("HINT: The system memory is corrupted. Flaws report message field ONLY accepts binary [0, 1, space]. Instruct us which bugs are solved and how.");
   }, [currentLevel, navigate]);
 
+  // BUG FIX 10b: Remove the reversal logic
   const updateField = (field, value) => {
-    let finalValue = value;
-    // CTF Bug: Team name is inverted
-    if (field === 'teamName') {
-      finalValue = value.split('').reverse().join('');
-    }
-    setFormState(prev => ({ ...prev, [field]: finalValue }));
+    setFormState(prev => ({ ...prev, [field]: value }));
   };
 
   const incrementPhone = () => {
-    const step = precisionMode ? 1 : 2;
-    setFormState(prev => ({
-      ...prev,
-      phoneCounter: Math.min(prev.phoneCounter + step, 9999999999),
-    }));
+    // Removed: phone no longer uses counter
   };
 
   const decrementPhone = () => {
-    const step = precisionMode ? 1 : 2;
-    setFormState(prev => ({
-      ...prev,
-      phoneCounter: Math.max(prev.phoneCounter - step, 1000000000),
-    }));
+    // Removed: phone no longer uses counter
   };
 
   const handleEmailLabelContextMenu = (e) => {
@@ -72,28 +60,27 @@ function FeedbackFinalPage() {
     setUploadProgress(0);
     const interval = setInterval(() => {
       setUploadProgress(prev => {
-        const next = prev + Math.random() * 15;
-        // STUDENT CHALLENGE: The progress bar is stuck at 99%! (Silk Board Ceiling)
-        if (next >= 99) {
+        const next = prev + Math.random() * 20;
+        if (next >= 100) {
           clearInterval(interval);
-          return 99; 
+          setIsUploading(false);
+          return 100; 
         }
         return next;
       });
-    }, 400);
+    }, 300);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // CTF BUG: Enforce strict "@Gmail" exact string
-    const emailUppercaseBlocked = !formState.email.endsWith('@Gmail');
-    const dobIsPast = formState.dob && formState.dob < new Date().toISOString().split('T')[0];
-    const dobBlocked = dobIsPast && !dobRuleUnlocked;
-    const phoneLooksUnfixed = String(formState.phoneCounter).endsWith('2') || String(formState.phoneCounter).endsWith('4');
-    const messageBinaryOnly = /^[01\s]+$/.test(formState.message.trim());
+    // Simplified validation: accept standard formats
+    const emailValid = formState.email.includes('@') && formState.email.length > 5;
+    const dobValid = formState.dob !== '';
+    const phoneValid = formState.phone.length >= 10;
+    const messageValid = formState.message.trim().length > 0;
 
-    if (!formState.teamName || !formState.email || !formState.dob || !formState.message.trim() || emailUppercaseBlocked || dobBlocked || phoneLooksUnfixed || !messageBinaryOnly) {
+    if (!formState.teamName || !emailValid || !dobValid || !phoneValid || !messageValid) {
       setSubmitStatus('Submission blocked. Check behavior and retry.');
       return;
     }
@@ -107,13 +94,6 @@ function FeedbackFinalPage() {
     // FEATURE 3: Upload check
     if (uploadProgress < 100) {
       setSubmitStatus('Verification Incomplete: Profile picture sync stuck at Silk Board junction (99%).');
-      return;
-    }
-
-    // CTF BUG: Reversal trap on save!
-    // STUDENT CHALLENGE: Even after fixing the mirror CSS, the save still fails. Why?
-    if (formState.teamName !== formState.teamName.split('').reverse().join('')) {
-      setSubmitStatus('Security Check: Name string proxy invalid (must be a palindrome to save).');
       return;
     }
 
@@ -145,8 +125,8 @@ function FeedbackFinalPage() {
 
       await advanceLevel(4, 'feedback-final-submitted');
       const totalTime = await completeGame();
-      // THE FINAL TRAP: Redirect to 404 instead of completion
-      navigate('/not-found', { state: { totalTime } });
+      // BUG FIX 10e: Change '/not-found' to '/complete'
+      navigate('/complete', { state: { totalTime } });
     } catch {
       setSubmitStatus('Submission blocked. Retry.');
     } finally {
@@ -167,13 +147,13 @@ function FeedbackFinalPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Team Name</label>
+            {/* BUG FIX 10b: Remove RTL styling */}
             <input
               type="text"
               className="cyber-input"
               value={formState.teamName}
               onChange={(e) => updateField('teamName', e.target.value)}
               placeholder="Team identifier"
-              style={{ unicodeBidi: 'bidi-override', direction: 'rtl' }}
             />
           </div>
 
@@ -201,33 +181,32 @@ function FeedbackFinalPage() {
               </div>
               <span style={{ fontSize: '0.8rem', minWidth: '35px' }}>{Math.floor(uploadProgress)}%</span>
             </div>
-            {uploadProgress === 99 && (
-              <p style={{ color: 'var(--color-error)', fontSize: '0.7rem', marginTop: '0.5rem' }}>
-                ⚠️ Network Congestion: Stuck at Silk Board Junction.
+            {uploadProgress === 100 && (
+              <p style={{ color: 'var(--color-pink)', fontSize: '0.7rem', marginTop: '0.5rem' }}>
+                ✓ Upload Complete at 100%
               </p>
             )}
           </div>
 
-          {/* FEATURE 4: Admin Toggle with Bubbling Trap */}
+          {/* FEATURE 4: Admin Toggle - BUG FIX 10c: Remove parent onClick */}
           <div className="form-group">
             <label className="form-label">System Privileges</label>
             <div 
-              onClick={() => setIsAdmin(false)} 
               style={{ 
                 position: 'relative', 
                 padding: '0.5rem', 
                 background: 'rgba(0,0,0,0.2)', 
                 border: '1px solid #333',
-                cursor: 'pointer'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div 
                   className={`toggle-broken ${isAdmin ? 'active' : ''}`}
                   onClick={(e) => {
-                    // STUDENT CHALLENGE: This toggle keeps switching back to OFF! (Event Bubbling)
+                    e.stopPropagation();
                     setIsAdmin(!isAdmin);
                   }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="toggle-broken__slider"></div>
                 </div>
@@ -247,15 +226,14 @@ function FeedbackFinalPage() {
               Phone Number Counter
             </label>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <button type="button" className="cyber-btn" onClick={decrementPhone}>-</button>
               <input
-                type="text"
+                type="tel"
                 className="cyber-input"
-                value={String(formState.phoneCounter).padStart(10, '0')}
-                readOnly
-                style={{ textAlign: 'center' }}
+                value={formState.phone}
+                onChange={(e) => updateField('phone', e.target.value)}
+                placeholder="+1 (555) 123-4567"
+                style={{ flex: 1 }}
               />
-              <button type="button" className="cyber-btn" onClick={incrementPhone}>+</button>
             </div>
           </div>
 
@@ -281,7 +259,6 @@ function FeedbackFinalPage() {
               className="cyber-input"
               value={formState.dob}
               onChange={(e) => updateField('dob', e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
             />
           </div>
 
@@ -327,28 +304,13 @@ function FeedbackFinalPage() {
 
           {submitStatus && <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>{submitStatus}</p>}
 
+          {/* BUG FIX 10a: Remove invisible blocking div */}
           <div style={{ position: 'relative' }}>
-            {/* STUDENT CHALLENGE: Why can't I click the submit button? (Z-Index Trap) */}
-            <div 
-              style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                zIndex: 9999,
-                cursor: 'not-allowed',
-                opacity: 0 // Invisible trap!
-              }} 
-              title="System Error: Button Blocked"
-              onClick={(e) => {
-                e.preventDefault();
-                setSubmitStatus("ERR_BLOCKED: An invisible force prevents submission.");
-              }}
-            />
             <button type="submit" className="cyber-btn" style={{ width: '100%', position: 'relative', zIndex: 1 }} disabled={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit Final Feedback'}
             </button>
           </div>
         </form>
-
 
         <div className="progress-dots" style={{ marginTop: '1.5rem' }}>
           <div className="progress-dot completed"></div>

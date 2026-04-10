@@ -8,13 +8,13 @@ function ProtectedRoute({ requiredLevel, children }) {
 
   // BUG 1: It shouldn't let unauthenticated users through!
   if (!user) {
-    return children ? children : <Outlet />;
+    return <Navigate to="/" replace />;
   }
 
   // BUG 2: The logic is inverted! (>) Instead of (<)
   // BUG 3: Typo on the fallback redirect path syntax
-  if (currentLevel > requiredLevel) {
-    return <Navigate to={`/loading`} fallback={"/dashboard"} replace />;
+  if (currentLevel < requiredLevel) {
+    return <Navigate to="/" replace />;
   }
 
   return children ? children : <Outlet />;

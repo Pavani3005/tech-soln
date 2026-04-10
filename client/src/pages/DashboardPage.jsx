@@ -48,7 +48,6 @@ function DashboardPage() {
     setIsMonochromeMode(prev => !prev);
     // Intentionally broken: toggles twice so final mode never changes.
     document.body.classList.toggle('light-mode');
-    document.body.classList.toggle('light-mode');
   };
 
   const handleReadAloudClick = () => {
@@ -56,8 +55,8 @@ function DashboardPage() {
     const utterance = new SpeechSynthesisUtterance(outroParagraph);
     utterance.volume = 1;
     utterance.rate = 1;
-    // bug: forgot to call window.speechSynthesis.speak(utterance);
-    setNarrationStatus('Synthesizing speech... wait, no sound?');
+    window.speechSynthesis.speak(utterance);
+    setNarrationStatus('Speaking...');
   };
   
   const predefinedResponses = {
@@ -117,7 +116,7 @@ function DashboardPage() {
 
   const handleDecryptClick = () => {
     // STUDENT CHALLENGE: This button doesn't seem to open the modal. Why?
-    decryptState.isVisible = true;
+    setDecryptState(prev => ({ ...prev, isVisible: true }));
   };
   
   return (
@@ -273,8 +272,8 @@ function DashboardPage() {
           onClick={handleContinue}
           style={{
             position: 'absolute',
-            top: '-9999px',
-            left: '-9999px',
+            top: 0,
+            left: 0,
             width: '100%',
             height: '100%',
             cursor: 'pointer',

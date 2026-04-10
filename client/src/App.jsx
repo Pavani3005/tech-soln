@@ -19,7 +19,7 @@ function App() {
           <Route path="/game-choice" element={<GameChoicePage />} />
           
           {/* CTF Challenge: Why aren't these routes being protected properly?? */}
-          <Route element={<ProtectedRoute requireLevel={2} />}>
+          <Route element={<ProtectedRoute requiredLevel={2} />}>
             <Route path="/loading" element={<LoadingPage />} />
           </Route>
           
@@ -30,7 +30,7 @@ function App() {
           } />
           
           <Route path="/feedback-final" element={
-            <ProtectedRoute requiredLevel="level-4">
+            <ProtectedRoute requiredLevel={4}>
               <FeedbackFinalPage />
             </ProtectedRoute>
           } />

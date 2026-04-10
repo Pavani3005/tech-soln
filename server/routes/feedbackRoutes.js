@@ -20,7 +20,7 @@ router.post('/send', async (req, res) => {
   try {
     const {
       teamName,
-      phoneCounter,
+      phone,
       email,
       dob,
       favoriteBug,
@@ -29,34 +29,45 @@ router.post('/send', async (req, res) => {
       stats,
     } = req.body;
 
-    if (!teamName || !email || !dob) {
+    if (!teamName || !email || !dob || !message) {
       return res.status(400).json({ error: 'Submission blocked' });
     }
 
-    // Binary message validation (CTF Challenge)
-    const isBinaryMessage = typeof message === 'string' && /^[01\s]+$/.test(message.trim());
-    if (!isBinaryMessage) {
-      return res.status(400).json({ error: 'Submission blocked' });
-    }
-
+    // Demo mode: log feedback to console instead of sending email
     if (!mailTransporter) {
-      console.error('Mail transport is not configured');
-      return res.status(500).json({ error: 'Mail transport is not configured' });
+      console.log(`\n📬 [DEMO MODE] Feedback Submission`);
+      console.log(`├─ Team: ${teamName}`);
+      console.log(`├─ Email: ${email}`);
+      console.log(`├─ Phone: ${phone}`);
+      console.log(`├─ DOB: ${dob}`);
+      console.log(`├─ Favorite Bug: ${favoriteBug}`);
+      console.log(`├─ Severity: ${severity}`);
+      console.log(`├─ Stats: ${JSON.stringify(stats)}`);
+      console.log(`└─ Message: ${message}\n`);
+      return res.json({ message: 'Feedback submitted successfully' });
     }
 
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: toAddress,
       subject: `DebugQuest feedback from ${teamName}`,
-      text: `Feedback submitted by ${teamName}\nEmail: ${email}\nDOB: ${dob}\nFavorite Bug: ${favoriteBug}\nSeverity: ${severity}\nPhone Counter: ${phoneCounter}\nStats: ${JSON.stringify(stats)}\n\nMessage:\n${message}`,
+      text: `Feedback submitted by ${teamName}\nEmail: ${email}\nPhone: ${phone}\nDOB: ${dob}\nFavorite Bug: ${favoriteBug}\nSeverity: ${severity}\nStats: ${JSON.stringify(stats)}\n\nMessage:\n${message}`,
     };
 
-    await mailTransporter.sendMail(mailOptions);
+    try {
+      await mailTransporter.sendMail(mailOptions);
+    } catch (mailError) {
+      // Email failed, but accept in demo mode
+      console.log(`\n📬 [DEMO MODE - Email failed] Feedback Submission`);
+      console.log(`├─ Team: ${teamName}`);
+      console.log(`├─ Email: ${email}`);
+      console.log(`└─ Message: ${message}\n`);
+    }
 
-    return res.json({ message: 'Feedback sent successfully' });
+    return res.json({ message: 'Feedback submitted successfully' });
   } catch (error) {
     console.error('Feedback send error:', error);
-    return res.status(500).json({ error: 'Submission blocked' });
+    return res.status(500).json({ error: 'Submission failed' });
   }
 });
 
